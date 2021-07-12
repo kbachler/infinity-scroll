@@ -1,13 +1,29 @@
 const imageContainer = document.getElementById('image-container');
 const loader = document.getElementById('loader');
+let ready = false;
+let imagesLoaded = 0;
+let totalImages = 0;
+let isInitialLoad = true;
 let photosArray = [];
 
 // Unsplash API
-const count = 30;
+let initialCount = 5;
 const animalId = "Jpg6Kidl-Hk";
 const apiKey = 'API_KEY';
-const apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${count}&topics=${animalId}`;
-//const aUrl = `https://api.unsplash.com/topics/animals?client_id=${apiKey}`;
+let apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${initialCount}&topics=${animalId}`;
+
+function updateAPIURLWithNewCount(picCount) {
+    apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${picCount}&topics=${animalId}`;
+}
+
+// Determine when image is loaded successfully
+function imageLoaded() {
+    imagesLoaded++;
+    if(imagesLoaded === totalImages) {
+        ready = true;
+        loader.hidden = true;
+    }
+}
 
 // Helper function to set attributes on DOM elements
 function setAttributes(element, attributes) {
@@ -18,6 +34,8 @@ function setAttributes(element, attributes) {
 
 // Create elements for links and photos. Add to DOM
 function displayPhotos() {
+    imagesLoaded = 0;
+    totalImages = photosArray.length;
     photosArray.forEach((photo) => {
         // Create anchor element to link to Unsplash API
         const item = document.createElement('a');
@@ -33,7 +51,9 @@ function displayPhotos() {
             alt: photo.alt_description,
             title: photo.alt_description
         });
-        
+        // Event listener, check when each photo is finished loading
+        img.addEventListener('load', imageLoaded());
+
         // Place <img> inside the <a>, then place into imageContainer
         item.appendChild(img);
         imageContainer.appendChild(item);
@@ -43,6 +63,10 @@ function displayPhotos() {
 // Get photos from Unsplash API
 async function getPhotos() {
     try {
+        if (isInitialLoad) {
+            updateAPIURLWithNewCount(30);
+            isInitialLoad = false;
+        }
         const response = await fetch(apiUrl);
         photosArray = await response.json();
         displayPhotos();
@@ -50,5 +74,13 @@ async function getPhotos() {
         alert(error);
     }
 }
+
+// Load more photos if scrolling near bottom of page
+window.addEventListener('scroll', () => {
+    if(((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 1000) && ready) {
+        getPhotos();
+        ready = false;
+    }
+});
 
 getPhotos();
