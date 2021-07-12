@@ -5,7 +5,7 @@ let photosArray = [];
 // Unsplash API
 const count = 30;
 const animalId = "Jpg6Kidl-Hk";
-const apiKey = '-nssvYYWjVofPr6vIl0PGqX2DSCrJ9S7omxcD6DZyYw';
+const apiKey = 'API_KEY';
 const apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${count}&topics=${animalId}`;
 //const aUrl = `https://api.unsplash.com/topics/animals?client_id=${apiKey}`;
 
